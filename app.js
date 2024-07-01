@@ -1,14 +1,24 @@
 const express = require("express")
-const ip = require('ip')
-const axios = require('axios')
 const dotenv = require('dotenv').config()
 
 const app = express()
-
-const client_ip = ip.address()
 async function getLocation(){
-    const response = await axios.get(`https://geo.ipify.org/api/v2/country,city?apiKey=${process.env.IP_API_SECRET}&ipAddress=${client_ip}`)
-    return response.data
+    try{
+        const response = await fetch(`https://geo.ipify.org/api/v2/country,city?apiKey=${process.env.API_SECRET}`)
+        const data = await response.json()
+        return data
+    }catch(err){
+        console.error(err)
+    }
+}
+async function getTemp(city){
+    try{
+        const response = await fetch(`http://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_API_KEY}&q=${city}`)
+        const data = await response.json()
+        return data
+    }catch(err){
+        console.error(err)
+    }
 }
 
 app.get("/api/hello", async (req, res) => {
@@ -16,8 +26,14 @@ app.get("/api/hello", async (req, res) => {
 
     try{
         const locale = await getLocation()
-        const city = locale.location.city || "New York"
-        const greeting = `Hello, ${visitor}!, the temperature is 11 degree Celcius in ${city}`;
+        const client_ip = locale.ip
+        const city = locale.location.region
+
+        const temperature = await getTemp(city)
+        const temp = temperature.current.temp_c
+
+        const greeting = `Hello, ${visitor}!, the temperature is ${temp} degree Celcius in ${city}`;
+
         res.json({ client_ip, location: city, greeting })
     } catch(err){
         console.log(err)
