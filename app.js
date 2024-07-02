@@ -2,10 +2,11 @@ const express = require("express")
 const dotenv = require('dotenv').config()
 
 const app = express()
-async function getLocation(){
+async function getLocation(client_ip){
     try{
-        const response = await fetch(`https://ipinfo.io?token=${process.env.API_SECRET}`)
+        const response = await fetch(`https://ipinfo.io/${client_ip}?token=${process.env.API_SECRET}`)
         const data = await response.json()
+        console.log(data)
         return data
     }catch(err){
         console.error(err)
@@ -26,7 +27,7 @@ app.get("/api/hello", async (req, res) => {
     const client_ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
     try{
-        const locale = await getLocation()
+        const locale = await getLocation(client_ip)
         const city = locale.city
 
 
