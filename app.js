@@ -1,11 +1,10 @@
 const express = require("express")
-const ip = require("ip")
 const dotenv = require('dotenv').config()
 
 const app = express()
 async function getLocation(){
     try{
-        const response = await fetch(`https://ip-geolocation.whoisxmlapi.com/api/v1?apiKey=${process.env.API_SECRET}`)
+        const response = await fetch(`https://ipinfo.io?token=${process.env.API_SECRET}`)
         const data = await response.json()
         return data
     }catch(err){
@@ -24,11 +23,12 @@ async function getTemp(){
 
 app.get("/api/hello", async (req, res) => {
     const visitor = req.query.visitor_name
+    const client_ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
     try{
         const locale = await getLocation()
-        const city = locale.location.region
-        const client_ip = locale.ip
+        const city = locale.city
+
 
         const temperature = await getTemp()
         const temp = temperature.current.temp_c
