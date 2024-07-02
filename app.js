@@ -14,7 +14,7 @@ async function getLocation(){
 }
 
 app.get("/api/hello", async (req, res) => {
-    const visitor = req.query.visitor_name || "Mark"
+    const visitor = req.query.visitor_name
     const client_ip = ip.address()
 
     try{
